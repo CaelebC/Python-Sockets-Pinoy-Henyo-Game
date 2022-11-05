@@ -17,14 +17,35 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as clie:
     print( clie.recv(2048).decode(FORMAT) )   # Server will send 2 messages
     print( clie.recv(2048).decode(FORMAT) )   # this is to display it in client
     
+    user_input = str(input()).upper()
+    clie.send( user_input.encode(FORMAT) )
+    if user_input == DISCONNECT_MESSAGE:
+        quit()
+    elif user_input == 'Y':
+        pass
+    elif user_input == 'N':
+        print( clie.recv(2048).decode(FORMAT) )  # This is to receive the please wait text
+
+    print( clie.recv(2048).decode(FORMAT) )
     while True:
         # BUG: When user sends a blank string (i.e. ''), then both terminals of
         # server and client freeze up.
         # BUG: When server closes itself, the client still needs to input anything
         # in the terminal to close the program.
+        # BUG: When the client is done with the game (either win or lose, BUT NOT QUIT),
+        # then the client will need to enter anything in order to go back to the
+        # normal console functionality.
         user_input = str(input())
-        if user_input == DISCONNECT_MESSAGE:
-            break
         clie.send( user_input.encode(FORMAT) )
+        if user_input == DISCONNECT_MESSAGE:
+            print( clie.recv(2048).decode(FORMAT) )
+            break
 
-        print( clie.recv(2048).decode(FORMAT) )
+        received_text = clie.recv(2048).decode(FORMAT)
+        print( received_text )
+        # if received_text == '\nCONGRATULATIONS YOU GOT THE WORD!\nIt took you {user_attempts} attempts to get it right.':
+        #     quit()
+        # else:
+        #     print( received_text )
+
+

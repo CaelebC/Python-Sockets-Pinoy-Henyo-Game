@@ -29,15 +29,18 @@ def pinoy_henyo_select():
 
     if selection == 'Y':
         word = random.choice(WORDSET)
-        print('THE CHOSEN WORD IS: ' + word)
+        print('THE CHOSEN WORD IS: ' + word)  # print() so that it's only visible in server side
         pinoy_henyo_game(word, ATTEMPTS)
 
     else:
-        # TODO: IMPLEMENT A CUSTOM SERVER INPUT FOR CLIENT TO GUESS
-        print('THE CHOSEN WORD IS: ' + 'uh this isnt working yet why are you here dont use this yet')
+        awaitText = "Please wait as the server is inputing a word for you to guess."
+        conn.send( awaitText.encode(FORMAT) )
+
+        word = str(input('Please input a custom word for client to guess: ')).lower()
+        print('THE CHOSEN WORD IS: ' + word)
+        pinoy_henyo_game(word, ATTEMPTS)
 
 def pinoy_henyo_game(_word, _attempts):
-    # why does python not have a do-while loop this is the only time i want it
     print_serv_clie(f'[GAME START] TOTAL ATTEMPTS: {_attempts}')
     _word = _word
     user_attempts = 0
@@ -46,17 +49,24 @@ def pinoy_henyo_game(_word, _attempts):
         user_input = ((conn.recv(2048)).decode(FORMAT)).lower()
         user_attempts += 1
 
+        print(user_input)
+        type(user_input)
+        if user_input == DISCONNECT_MESSAGE:
+            print('User quit')
+            break
+
         if user_input == _word:
             print_serv_clie(f'\nCONGRATULATIONS YOU GOT THE WORD!\nIt took you {user_attempts} attempts to get it right.')
             failed = False
             break
         else:
-            # TODO: ALLOW SERVER TO 'REPLY' WHETHER GUESS/PROMPT IS CORRECT OR FALSE OR 'CLOSE'
             print('[CLIENT] ' + user_input)  # This is to show on the server what the client's input was
-            print_serv_clie(f'\nWell you are not correct, try again.\n[ATTEMPTS REMAINING] {(_attempts - user_attempts)}')
+            serv_reply = str(input('Sagot ba nila ay: OO / HINDI / PWEDE ? '))
+            serv_reply = '[SERVER] ' + serv_reply + (f'\n[ATTEMPTS REMAINING] {(_attempts - user_attempts)}')  # Super scuffed but it's the simplest way to do it
+            conn.send( serv_reply.encode(FORMAT) )
     
     if failed:
-        # BUG: the correct word isn't displayed on the client
+        # BUG: the correct word isn't displayed on the client when they're out of attempts
         print_serv_clie('The correct word was: ' + _word)
 
 # Socket Section -- Server
