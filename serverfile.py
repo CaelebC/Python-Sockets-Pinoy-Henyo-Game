@@ -7,7 +7,11 @@ import socket
 import random
 
 PORT = 65432
-SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = socket.gethostbyname(socket.gethostname())  # Use this if connecting through the same machine (2 terminals)
+# SERVER = ''  # Use this if connecting with a different device, place the IP in the single quotes. 
+# Get the IPv4 Address that the server has (type 'ipconfig' in CMD if on Windows).
+# See README.md file for more detailed steps.
+
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "/dc"
@@ -21,7 +25,7 @@ WORDSET = [
     'denji', 'anya', 'jose rizal', 'juan', 'juana', 'ina', 'pomu',
     'penguin', 'fish', 'cat', 'dog', 'octopus', 'bird', 'dragon',
 ]
-ATTEMPTS = 25
+ATTEMPTS = 2
 
 def pinoy_henyo_select():
     print_serv_clie('Use random word from wordset? Type Y or N\n')
@@ -62,8 +66,14 @@ def pinoy_henyo_game(_word, _attempts):
         else:
             print('[CLIENT] ' + user_input)  # This is to show on the server what the client's input was
             serv_reply = str(input('Sagot ba nila ay: OO / HINDI / PWEDE ? '))
-            serv_reply = '[SERVER] ' + serv_reply + (f'\n[ATTEMPTS REMAINING] {(_attempts - user_attempts)}')  # Super scuffed but it's the simplest way to do it
-            conn.send( serv_reply.encode(FORMAT) )
+            if serv_reply == DISCONNECT_MESSAGE:
+                print_serv_clie('Server quit')
+                break
+
+            serv_reply = '[SERVER] ' + serv_reply + (f'\n[ATTEMPTS REMAINING] {(_attempts - user_attempts)}')  # Hard coded but it's the simplest way to do it
+            print_serv_clie(serv_reply)
+            if user_attempts == 0:
+                break
     
     if failed:
         # BUG: the correct word isn't displayed on the client when they're out of attempts

@@ -6,7 +6,10 @@
 import socket
 
 PORT = 65432
-CLIENT = socket.gethostbyname(socket.gethostname())
+CLIENT = socket.gethostbyname(socket.gethostname())  # Use this if connecting through the same machine (2 terminals)
+# CLIENT = ''  # Use this if connecting with a different device, place the IP in the single quotes. 
+# Get the IPv4 Address that the server has (type 'ipconfig' in CMD if on Windows)
+
 ADDR = (CLIENT, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "/dc"
@@ -43,9 +46,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as clie:
 
         received_text = clie.recv(2048).decode(FORMAT)
         print( received_text )
-        # if received_text == '\nCONGRATULATIONS YOU GOT THE WORD!\nIt took you {user_attempts} attempts to get it right.':
-        #     quit()
-        # else:
-        #     print( received_text )
 
-
+        if "CONGRATULATIONS" in received_text:
+            quit()
+        elif "[ATTEMPTS REMAINING] 0" in received_text:
+            received_text = clie.recv(2048).decode(FORMAT)
+            quit()
+        elif "Server quit" in received_text:
+            quit()
