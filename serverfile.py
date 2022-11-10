@@ -29,6 +29,7 @@ ATTEMPTS = 2
 
 def pinoy_henyo_select():
     print_serv_clie('Use random word from wordset? Type Y or N\n')
+    print('Waiting for response...\n')
     selection = ((conn.recv(2048)).decode(FORMAT)).upper()
 
     if selection == 'Y':
@@ -46,6 +47,7 @@ def pinoy_henyo_select():
 
 def pinoy_henyo_game(_word, _attempts):
     print_serv_clie(f'[GAME START] TOTAL ATTEMPTS: {_attempts}')
+    print('Waiting for response...\n')
     _word = _word
     user_attempts = 0
     failed = True
@@ -53,8 +55,6 @@ def pinoy_henyo_game(_word, _attempts):
         user_input = ((conn.recv(2048)).decode(FORMAT)).lower()
         user_attempts += 1
 
-        print(user_input)
-        type(user_input)
         if user_input == DISCONNECT_MESSAGE:
             print('User quit')
             break
@@ -65,18 +65,16 @@ def pinoy_henyo_game(_word, _attempts):
             break
         else:
             print('[CLIENT] ' + user_input)  # This is to show on the server what the client's input was
-            serv_reply = str(input('Sagot ba nila ay: OO / HINDI / PWEDE ? '))
+            serv_reply = str(input('Sagot ba nila ay: OO / HINDI / PWEDE ?\nSERVER INPUT: '))
             if serv_reply == DISCONNECT_MESSAGE:
                 print_serv_clie('Server quit')
                 break
 
             serv_reply = '[SERVER] ' + serv_reply + (f'\n[ATTEMPTS REMAINING] {(_attempts - user_attempts)}')  # Hard coded but it's the simplest way to do it
             print_serv_clie(serv_reply)
-            if user_attempts == 0:
-                break
+            print('Waiting for response...\n')
     
     if failed:
-        # BUG: the correct word isn't displayed on the client when they're out of attempts
         print_serv_clie('The correct word was: ' + _word)
 
 # Socket Section -- Server

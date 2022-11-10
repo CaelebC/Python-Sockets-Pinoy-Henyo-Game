@@ -33,17 +33,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as clie:
     while True:
         # BUG: When user sends a blank string (i.e. ''), then both terminals of
         # server and client freeze up.
-        # BUG: When server closes itself, the client still needs to input anything
-        # in the terminal to close the program.
-        # BUG: When the client is done with the game (either win or lose, BUT NOT QUIT),
-        # then the client will need to enter anything in order to go back to the
-        # normal console functionality.
-        user_input = str(input())
+        user_input = str(input('CLIENT INPUT: '))
         clie.send( user_input.encode(FORMAT) )
         if user_input == DISCONNECT_MESSAGE:
             print( clie.recv(2048).decode(FORMAT) )
             break
-
+        print('Waiting for response...\n')
         received_text = clie.recv(2048).decode(FORMAT)
         print( received_text )
 
@@ -51,6 +46,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as clie:
             quit()
         elif "[ATTEMPTS REMAINING] 0" in received_text:
             received_text = clie.recv(2048).decode(FORMAT)
+            print( received_text )
             quit()
         elif "Server quit" in received_text:
             quit()
